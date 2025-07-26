@@ -138,7 +138,7 @@ class GeizhalsIntegrationApiClient:
             _error_msg = "URL does not end with .html"
             raise GeizhalsIntegrationInvalidUrlError(_error_msg)
 
-            url = f"{url}?" if "?" not in url else f"{url}&"
+        url = f"{url}?" if "?" not in url else f"{url}&"
 
         return f"{url}hloc=at&hloc=de&hloc=pl&hloc=uk&hloc=eu"
 
