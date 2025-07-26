@@ -8,5 +8,5 @@
   "documentation": "https://github.com/CommanderRedYT/homeassistant_geizhals_integration",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/CommanderRedYT/homeassistant_geizhals_integration/issues",
-  "version": "0.1.2"
+  "version": "0.1.3"
 }
