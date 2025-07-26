@@ -8,10 +8,14 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .coordinator import GeizhalsIntegrationDataUpdateCoordinator
 
 
-class GeizhalsIntegrationEntity(CoordinatorEntity[GeizhalsIntegrationDataUpdateCoordinator]):
+class GeizhalsIntegrationEntity(
+    CoordinatorEntity[GeizhalsIntegrationDataUpdateCoordinator]
+):
     """BlueprintEntity class."""
 
-    def __init__(self, coordinator: GeizhalsIntegrationDataUpdateCoordinator, id_suffix: str) -> None:
+    def __init__(
+        self, coordinator: GeizhalsIntegrationDataUpdateCoordinator, id_suffix: str
+    ) -> None:
         """Initialize."""
         super().__init__(coordinator)
         self._attr_unique_id = coordinator.config_entry.entry_id + id_suffix

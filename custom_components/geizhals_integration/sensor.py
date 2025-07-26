@@ -4,8 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from homeassistant.components.sensor import SensorEntity, SensorEntityDescription, SensorStateClass
-from homeassistant.const import EntityCategory, CURRENCY_EURO
+from homeassistant.components.sensor import (
+    SensorEntity,
+    SensorEntityDescription,
+    SensorStateClass,
+)
+from homeassistant.const import CURRENCY_EURO
 
 from .entity import GeizhalsIntegrationEntity
 
@@ -35,7 +39,7 @@ async def async_setup_entry(
                     suggested_display_precision=2,
                     icon="mdi:currency-eur",
                 ),
-                data_key="min_price"
+                data_key="min_price",
             ),
             GeizhalsIntegrationSensor(
                 coordinator=entry.runtime_data.coordinator,
@@ -47,7 +51,7 @@ async def async_setup_entry(
                     suggested_display_precision=2,
                     icon="mdi:currency-eur",
                 ),
-                data_key="max_price"
+                data_key="max_price",
             ),
         ]
     )

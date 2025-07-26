@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
+import re
 import socket
 from typing import Any
 
 import aiohttp
 import async_timeout
-
 from bs4 import BeautifulSoup
-import re
+
 
 class GeizhalsIntegrationApiClientError(Exception):
     """Exception to indicate a general API error."""
@@ -32,6 +32,7 @@ class GeizhalsIntegrationInvalidUrlError(
 ):
     """Exception to indicate an invalid URL error."""
 
+
 def _verify_response_or_raise(response: aiohttp.ClientResponse) -> None:
     """Verify that the response is valid."""
     if response.status in (401, 403):
@@ -42,33 +43,36 @@ def _verify_response_or_raise(response: aiohttp.ClientResponse) -> None:
     response.raise_for_status()
 
 
-def price_to_float(price_str):
+def price_to_float(price_str: str) -> float:
     """
-    Converts a price string like "€ 399,99" or "$1,234.56" to a floating point number.
-    Handles any currency symbol, spaces, thousands separators, and both comma/dot as decimal delimiter.
+    Convert a price string like "€ 399,99" or "$1,234.56" to a floating point number.
+
+    Handles any currency symbol, spaces, thousands separators,
+    and both comma/dot as decimal delimiter.
     """
-    # Remove all non-digit, non-separator characters (keep digits, dots, commas, colons)
-    cleaned = re.sub(r'[^\d.,:]', '', price_str)
+    cleaned = re.sub(r"[^\d.,:]", "", price_str)
 
     # If there are both comma and dot/colon, detect which is decimal
     # Find the last separator (comma, dot, colon)
     # All separators before the last are treated as thousands separators and removed
-    separators = [m.start() for m in re.finditer(r'[.,:]', cleaned)]
+    separators = [m.start() for m in re.finditer(r"[.,:]", cleaned)]
 
     if separators:
         last_sep = separators[-1]
-        decimal_sep = cleaned[last_sep]
-        integer_part = cleaned[:last_sep].replace(",", "").replace(".", "").replace(":", "")
-        decimal_part = cleaned[last_sep + 1:]
-        normalized = integer_part + '.' + decimal_part  # always use dot for float
+        integer_part = (
+            cleaned[:last_sep].replace(",", "").replace(".", "").replace(":", "")
+        )
+        decimal_part = cleaned[last_sep + 1 :]
+        normalized = integer_part + "." + decimal_part  # always use dot for float
     else:
         # No separators, just digits
         normalized = cleaned
 
     try:
         return float(normalized)
-    except ValueError:
-        raise ValueError(f"Could not convert '{price_str}' to float.")
+    except ValueError as err:
+        _error_msg = f"Could not convert '{price_str}' to float."
+        raise ValueError(_error_msg) from err
 
 
 class GeizhalsIntegrationApiClient:
@@ -83,7 +87,7 @@ class GeizhalsIntegrationApiClient:
         self._url = url
         self._session = session
 
-    def extract_current_price(self, html_data: str) -> dict:
+    def _extract_current_price(self, html_data: str) -> dict:
         out_data = {
             "min_price": None,
             "max_price": None,
@@ -97,23 +101,23 @@ class GeizhalsIntegrationApiClient:
             min_price_element_text = soup.find(id="pricerange-min").get_text().strip()
             max_price_element_text = soup.find(id="pricerange-max").get_text().strip()
 
-            if not min_price_element_text or not max_price_element_text:
-                raise GeizhalsIntegrationInvalidUrlError()
-
             min_price_float = price_to_float(min_price_element_text)
             max_price_float = price_to_float(max_price_element_text)
 
             out_data["min_price"] = min_price_float
             out_data["max_price"] = max_price_float
-            out_data["name"] = soup.select_one('h1.variant__header__headline').get_text().rsplit("|", 1)[0]
-
-            return out_data
+            out_data["name"] = (
+                soup.select_one("h1.variant__header__headline")
+                .get_text()
+                .rsplit("|", 1)[0]
+            )
         except Exception as exception:  # pylint: disable=broad-except
             msg = f"Something really wrong happened! - {exception}"
             raise GeizhalsIntegrationApiClientError(
                 msg,
             ) from exception
-
+        else:
+            return out_data
 
     async def async_get_data(self) -> Any:
         """Get data from the API."""
@@ -121,7 +125,22 @@ class GeizhalsIntegrationApiClient:
             method="get",
             url=self._url,
         )
-        return self.extract_current_price(html_data)
+        return self._extract_current_price(html_data)
+
+    def _check_url(self, url: str) -> str:
+        if not url.startswith("https://geizhals.at") and not url.startswith(
+            "https://geizhals.de"
+        ):
+            _error_msg = "URL is not from Geizhals"
+            raise GeizhalsIntegrationInvalidUrlError(_error_msg)
+
+        if not url.endswith(".html"):
+            _error_msg = "URL does not end with .html"
+            raise GeizhalsIntegrationInvalidUrlError(_error_msg)
+
+            url = f"{url}?" if "?" not in url else f"{url}&"
+
+        return f"{url}hloc=at&hloc=de&hloc=pl&hloc=uk&hloc=eu"
 
     async def _api_wrapper(
         self,
@@ -132,20 +151,7 @@ class GeizhalsIntegrationApiClient:
         """Get information from the API."""
         url = url.strip()
         try:
-            if not url.startswith("https://geizhals.at") and not url.startswith("https://geizhals.de"):
-                print(f"Url {url} is not Geizhals")
-                raise GeizhalsIntegrationInvalidUrlError()
-
-            if not url.endswith(".html"):
-                print(f"Url {url} does not end with .html")
-                raise GeizhalsIntegrationInvalidUrlError()
-
-            if not "?" in url:
-                url = f"{url}?"
-            else:
-                url = f"{url}&"
-
-            url = f"{url}hloc=at&hloc=de&hloc=pl&hloc=uk&hloc=eu"
+            url = self._check_url(url)
 
             async with async_timeout.timeout(10):
                 response = await self._session.request(
