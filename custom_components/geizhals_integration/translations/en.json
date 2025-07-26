@@ -2,17 +2,17 @@
     "config": {
         "step": {
             "user": {
-                "description": "If you need help with the configuration have a look here: https://github.com/CommanderRedYT/homeassistant_geizhals_integration",
+                "description": "Please paste in the URL of the product you want to monitor. Note: It has to start with https://geizhals.at/",
                 "data": {
-                    "username": "Username",
-                    "password": "Password"
+                    "url": "URL"
                 }
             }
         },
         "error": {
             "auth": "Username/Password is wrong.",
             "connection": "Unable to connect to the server.",
-            "unknown": "Unknown error occurred."
+            "unknown": "Unknown error occurred.",
+            "invalid_url": "The specified URL is invalid."
         },
         "abort": {
             "already_configured": "This entry is already configured."

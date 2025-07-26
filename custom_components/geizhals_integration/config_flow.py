@@ -1,6 +1,7 @@
 """Adds config flow for Blueprint."""
 
 from __future__ import annotations
+from typing import Any
 
 import voluptuous as vol
 from homeassistant import config_entries
@@ -14,6 +15,7 @@ from .api import (
     GeizhalsIntegrationApiClientAuthenticationError,
     GeizhalsIntegrationApiClientCommunicationError,
     GeizhalsIntegrationApiClientError,
+    GeizhalsIntegrationInvalidUrlError,
 )
 from .const import DOMAIN, LOGGER
 
@@ -31,12 +33,15 @@ class GeizhalsIntegrationFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         _errors = {}
         if user_input is not None:
             try:
-                await self._test_inputs(
+                test_result = await self._test_inputs(
                     url=user_input[CONF_URL],
                 )
             except GeizhalsIntegrationApiClientAuthenticationError as exception:
                 LOGGER.warning(exception)
                 _errors["base"] = "auth"
+            except GeizhalsIntegrationInvalidUrlError as exception:
+                LOGGER.error(exception)
+                _errors["base"] = "invalid_url"
             except GeizhalsIntegrationApiClientCommunicationError as exception:
                 LOGGER.error(exception)
                 _errors["base"] = "connection"
@@ -52,7 +57,7 @@ class GeizhalsIntegrationFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 )
                 self._abort_if_unique_id_configured()
                 return self.async_create_entry(
-                    title=user_input[CONF_URL],
+                    title=test_result["name"],
                     data=user_input,
                 )
 
@@ -73,10 +78,10 @@ class GeizhalsIntegrationFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             errors=_errors,
         )
 
-    async def _test_inputs(self, url: str) -> None:
+    async def _test_inputs(self, url: str) -> Any:
         """Validate credentials."""
         client = GeizhalsIntegrationApiClient(
             url=url,
             session=async_create_clientsession(self.hass),
         )
-        await client.async_get_data()
+        return await client.async_get_data()

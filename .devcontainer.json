@@ -1,5 +1,5 @@
 {
-    "name": "ludeeus/homeassistant_geizhals_integration",
+    "name": "commanderredyt/homeassistant_geizhals_integration",
     "image": "mcr.microsoft.com/devcontainers/python:3.13",
     "postCreateCommand": "scripts/setup",
     "forwardPorts": [

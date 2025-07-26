@@ -9,4 +9,4 @@ homeassistant:
 logger:
   default: info
   logs:
-    custom_components.homeassistant_geizhals_integration: debug
+    custom_components.geizhals_integration: debug

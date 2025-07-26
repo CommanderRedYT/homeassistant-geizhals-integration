@@ -1,4 +1,4 @@
-"""DataUpdateCoordinator for homeassistant_geizhals_integration."""
+"""DataUpdateCoordinator for geizhals_integration."""
 
 from __future__ import annotations
 

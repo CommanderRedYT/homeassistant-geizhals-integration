@@ -1,4 +1,4 @@
-"""Custom types for homeassistant_geizhals_integration."""
+"""Custom types for geizhals_integration."""
 
 from __future__ import annotations
 

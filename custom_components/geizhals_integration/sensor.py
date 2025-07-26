@@ -1,4 +1,4 @@
-"""Sensor platform for homeassistant_geizhals_integration."""
+"""Sensor platform for geizhals_integration."""
 
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ async def async_setup_entry(
             GeizhalsIntegrationSensor(
                 coordinator=entry.runtime_data.coordinator,
                 entity_description=SensorEntityDescription(
-                    key="homeassistant_geizhals_integration_min_price",
+                    key="geizhals_integration_min_price",
                     name="Current minimum price",
                     state_class=SensorStateClass.MEASUREMENT,
                     native_unit_of_measurement=CURRENCY_EURO,
@@ -40,7 +40,7 @@ async def async_setup_entry(
             GeizhalsIntegrationSensor(
                 coordinator=entry.runtime_data.coordinator,
                 entity_description=SensorEntityDescription(
-                    key="homeassistant_geizhals_integration_max_price",
+                    key="geizhals_integration_max_price",
                     name="Current maximum price",
                     state_class=SensorStateClass.MEASUREMENT,
                     native_unit_of_measurement=CURRENCY_EURO,
@@ -54,7 +54,7 @@ async def async_setup_entry(
 
 
 class GeizhalsIntegrationSensor(GeizhalsIntegrationEntity, SensorEntity):
-    """homeassistant_geizhals_integration Sensor class."""
+    """geizhals_integration Sensor class."""
 
     def __init__(
         self,

@@ -136,6 +136,10 @@ class GeizhalsIntegrationApiClient:
                 print(f"Url {url} is not Geizhals")
                 raise GeizhalsIntegrationInvalidUrlError()
 
+            if not url.endswith(".html"):
+                print(f"Url {url} does not end with .html")
+                raise GeizhalsIntegrationInvalidUrlError()
+
             if not "?" in url:
                 url = f"{url}?"
             else:
